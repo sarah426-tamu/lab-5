@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sarah Drvol First Web Map</title>
+  <!-- Include Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+   integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+   crossorigin=""/>
+  <style>
+    /* Adjust map container size */
+    #map {
+      height: 600px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <!-- Map container -->
+  <div id="map"></div>
+
+  <!-- Include Leaflet JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+   integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+   crossorigin=""></script>
+  
+  <script>
+    // Define LeafIcon class
+    var LeafIcon = L.Icon.extend({
+      options: {
+        shadowUrl: 'leaf-shadow.png',
+        iconSize:     [38, 95],
+        shadowSize:   [50, 64],
+        iconAnchor:   [22, 94],
+        shadowAnchor: [4, 62],
+        popupAnchor:  [-3, -76]
+      }
+    });
+
+    // Create custom leaf icons
+    var buildingIcon = new LeafIcon({iconUrl: 'building-icon.png'});
+
+    // Initialize the map
+    var map = L.map('map').fitWorld();
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
+
+    // Geolocation
+    map.locate({setView: true, maxZoom: 16});
+
+    // Function to handle location found
+    function onLocationFound(e) {
+      var radius = e.accuracy / 2;
+
+      L.marker(e.latlng).addTo(map)
+        .bindPopup("You are within " + radius + " meters from this point").openPopup();
+
+      L.circle(e.latlng, radius).addTo(map);
+    }
+
+    // Function to handle location error
+    function onLocationError(e) {
+      alert(e.message);
+    }
+
+    // Subscribe to location found and error events
+    map.on('locationfound', onLocationFound);
+    map.on('locationerror', onLocationError);
+
+    // Add marker for Kyle Field with popup
+    var kyleFieldMarker = L.marker([30.6102, -96.3417]).addTo(map)
+        .bindPopup("<b>Kyle Field</b><br>Home of Texas A&M Aggies Football");
+
+    // Add circle around Kyle Field
+    var kyleFieldCircle = L.circle([30.6102, -96.3417], {
+        color: 'blue',
+        fillColor: '#0073e6',
+        fillOpacity: 0.3,
+        radius: 300 // in meters
+    }).addTo(map);
+
+    // Add marker for Eller O&M Building with popup
+    var ellerMarker = L.marker([30.6181, -96.3388], {icon: buildingIcon}).addTo(map)
+        .bindPopup("<b>Eller O&M Building</b><br>Texas A&M University");
+
+    // Add marker for Academic Building with popup
+    var academicMarker = L.marker([30.6154, -96.3403], {icon: buildingIcon}).addTo(map)
+        .bindPopup("<b>Academic Building</b><br>Texas A&M University");
+
+    // Function to handle map click event
+    function onMapClick(e) {
+      L.popup()
+        .setLatLng(e.latlng)
+        .setContent("Coordinates: " + e.latlng.lat.toFixed(6) + ", " + e.latlng.lng.toFixed(6))
+        .openOn(map);
+    }
+
+    // Subscribe to map click event
+    map.on('click', onMapClick);
+  </script>
+</body>
+</html>
